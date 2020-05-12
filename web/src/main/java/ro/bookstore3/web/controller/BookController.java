@@ -6,55 +6,76 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.ubb.catalog.core.model.Student;
-import ro.ubb.catalog.core.service.StudentService;
-import ro.ubb.catalog.web.converter.StudentConverter;
-import ro.ubb.catalog.web.dto.StudentDto;
-import ro.ubb.catalog.web.dto.StudentsDto;
+import ro.bookstore3.models.Book;
+import ro.bookstore3.services.book.BookService;
+import ro.bookstore3.web.converter.BookConverter;
+import ro.bookstore3.web.dto.BookDto;
+import ro.bookstore3.web.dto.BooksDto;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-public class StudentController {
-    public static final Logger log= LoggerFactory.getLogger(StudentController.class);
+public class BookController {
+    public static final Logger log= LoggerFactory.getLogger(BookController.class);
 
     @Autowired
-    private StudentService studentService;
+    private BookService bookService;
 
     @Autowired
-    private StudentConverter studentConverter;
+    private BookConverter bookConverter;
 
 
-    @RequestMapping(value = "/students", method = RequestMethod.GET)
-    StudentsDto getStudents() {
+    @RequestMapping(value = "/books", method = RequestMethod.GET)
+    BooksDto getBooks() {
         //todo: log
-        return new StudentsDto(studentConverter
-                .convertModelsToDtos(studentService.getAllStudents()));
+        return new BooksDto(bookConverter
+                .convertModelsToDtos(bookService.getAllBooks()));
 
     }
 
-    @RequestMapping(value = "/students", method = RequestMethod.POST)
-    StudentDto saveStudent(@RequestBody StudentDto studentDto) {
+    @RequestMapping(value = "/books", method = RequestMethod.POST)
+    BookDto saveBook(@RequestBody BookDto bookDto) {
         //todo log
-        return studentConverter.convertModelToDto(studentService.saveStudent(
-                studentConverter.convertDtoToModel(studentDto)
+        return bookConverter.convertModelToDto(bookService.addBook(
+                bookConverter.convertDtoToModel(bookDto)
         ));
     }
 
-    @RequestMapping(value = "/students/{id}", method = RequestMethod.PUT)
-    StudentDto updateStudent(@PathVariable Long id,
-                             @RequestBody StudentDto studentDto) {
+    @RequestMapping(value = "/books/{id}", method = RequestMethod.PUT)
+    BookDto updateBook(@PathVariable Long id,
+                             @RequestBody BookDto bookDto) {
         //todo: log
-        return studentConverter.convertModelToDto( studentService.updateStudent(id,
-                studentConverter.convertDtoToModel(studentDto)));
+        Book book = bookConverter.convertDtoToModel(bookDto);
+        return bookConverter.convertModelToDto(bookService.updateBook(new Book(id,
+                book.getTitle(), book.getAuthor(), book.getPrice())));
     }
 
-    @RequestMapping(value = "/students/{id}", method = RequestMethod.DELETE)
-    ResponseEntity<?> deleteStudent(@PathVariable Long id){
+    @RequestMapping(value = "/books/{id}", method = RequestMethod.DELETE)
+    ResponseEntity<?> deleteBook(@PathVariable Long id){
         //todo:log
 
-        studentService.deleteStudent(id);
+        bookService.removeBook(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/books/{author}", method = RequestMethod.GET)
+    BooksDto filterBookAuthor(@PathVariable String author) {
+        //todo:Log
+        return new BooksDto(bookConverter
+                .convertModelsToDtos(bookService.getAllBooks()
+                        .stream()
+                        .filter(book -> author.equals(book.getAuthor()))
+                        .collect(Collectors.toList())));
+    }
+
+    @RequestMapping(value = "/books/{minPrice}/{maxPrice}", method = RequestMethod.GET)
+    BooksDto filterBookPrice(@PathVariable Double minPrice, @PathVariable Double maxPrice) {
+        //todo:Log
+        return new BooksDto(bookConverter
+                .convertModelsToDtos(bookService.getAllBooks()
+                        .stream()
+                        .filter(book -> book.getPrice() >= minPrice && book.getPrice() <= maxPrice)
+                        .collect(Collectors.toList())));
     }
 }

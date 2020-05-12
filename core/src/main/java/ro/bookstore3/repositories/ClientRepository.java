@@ -1,4 +1,7 @@
 package ro.bookstore3.repositories;
 
-public interface ClientRepository {
+import ro.bookstore3.models.Client;
+
+public interface ClientRepository extends Repository<Client, Long> {
+
 }

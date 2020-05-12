@@ -1,8 +1,17 @@
 package ro.bookstore3.models;
 
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import javax.persistence.Entity;
 
 @Entity
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Builder
 public class Client extends BaseEntity<Long> {
 
     private String firstName;

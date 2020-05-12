@@ -33,7 +33,7 @@ public class ClientController {
 
     }
 
-    @RequestMapping(value = "/books", method = RequestMethod.POST)
+    @RequestMapping(value = "/clients", method = RequestMethod.POST)
     ClientDto saveClient(@RequestBody ClientDto clientDto) {
         //todo log
         return clientConverter.convertModelToDto(clientService.addClient(
